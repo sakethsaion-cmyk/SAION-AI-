@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Download, Smartphone, Monitor, Terminal, Check, Star, Zap, Shield, Globe } from 'lucide-react'
 import SaionLogo from '../UI/SaionLogo'
 
-const GITHUB_BASE = 'https://github.com/sakethsaion-cmyk/SAION-AI-v1/releases/download/v1.0.0'
+const GITHUB_BASE = 'https://github.com/sakethsaion-cmyk/SAION-AI-/releases/download/v1.0.0'
 
 const platforms = [
   {
