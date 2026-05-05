@@ -432,7 +432,8 @@ export default function DownloadPage() {
               <strong className="text-gray-400">Windows:</strong> Windows 10/11,
               64-bit, 4GB RAM minimum · &nbsp;
               <strong className="text-gray-400">Android:</strong> Android 8.0+,
-              2GB RAM minimum · &nbsp;
+              2GB RAM minimum 
+              MAKE SURE YOU DOWNLOAD THE APP THROUGH CHROME NOT FROM FILES . &nbsp;
               <strong className="text-gray-400">Linux:</strong> Ubuntu 20.04+,
               Debian 11+, Fedora 35+, 4GB RAM minimum
             </p>
