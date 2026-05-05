@@ -58,7 +58,7 @@ const FEATURES = [
 
 // ─── Download cards ────────────────────────────────────────────────────────
 const GITHUB_BASE =
-  "https://github.com/sakethsaion-cmyk/SAION-AI-v1/releases/download/v1.0.0";
+  "https://github.com/sakethsaion-cmyk/SAION-AI-/releases/download/v1.0.1";
 
 const DOWNLOADS = [
   {
@@ -69,10 +69,10 @@ const DOWNLOADS = [
       </svg>
     ),
     ext: ".exe",
-    version: "v1.0.0",
+    version: "v1.0.1",
     size: "93.5 MB",
     requirement: "Windows 10 / 11 · 64-bit",
-    href: `${GITHUB_BASE}/SAION-AI-Setup-v1.0.0.exe`,
+    href: `${GITHUB_BASE}/SAION-AI-Setup-v1.0.1.exe`,
     gradient: "from-blue-600 to-blue-800",
     glow: "rgba(37,99,235,0.4)",
     border: "border-blue-700/30",
@@ -91,7 +91,7 @@ const DOWNLOADS = [
       </svg>
     ),
     ext: ".apk",
-    version: "v1.0.0",
+    version: "v1.0.1",
     size: "3.51 MB",
     requirement: "Android 8.0+ (Oreo)",
     href: `${GITHUB_BASE}/app-release.apk`,
@@ -113,10 +113,10 @@ const DOWNLOADS = [
       </svg>
     ),
     ext: ".AppImage",
-    version: "v1.0.0",
+    version: "v1.0.1",
     size: "134 MB",
     requirement: "Ubuntu / Debian / Fedora / Arch",
-    href: `${GITHUB_BASE}/SAION-AI-v1.0.0.AppImage`,
+    href: `${GITHUB_BASE}/SAION-AI-v1.0.1.AppImage`,
     gradient: "from-orange-600 to-amber-700",
     glow: "rgba(234,88,12,0.4)",
     border: "border-orange-700/30",
@@ -141,10 +141,10 @@ const DOWNLOADS = [
       </svg>
     ),
     ext: ".deb",
-    version: "v1.0.0",
+    version: "v1.0.1",
     size: "80.5 MB",
     requirement: "Ubuntu 20.04+ / Debian 11+ / Linux Mint",
-    href: `${GITHUB_BASE}/SAION-AI-v1.0.0.deb`,
+    href: `${GITHUB_BASE}/SAION-AI-v1.0.1.deb`,
     gradient: "from-purple-600 to-violet-700",
     glow: "rgba(124,58,237,0.4)",
     border: "border-violet-700/30",
@@ -232,7 +232,7 @@ export default function DownloadPage() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-violet-900/30 border border-violet-600/30 rounded-full text-violet-300 text-xs font-medium mb-5">
           <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-          Now Available — v1.0.0
+          Now Available — v1.0.1
         </div>
 
         <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
