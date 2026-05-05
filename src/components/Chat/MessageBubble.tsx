@@ -1,0 +1,465 @@
+import React, { useState, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { Copy, Check, Download, ExternalLink, Globe, ImageOff, Play, RefreshCw, FolderOpen, FileCode } from 'lucide-react'
+import { Message } from '../../types'
+import SaionLogo from '../UI/SaionLogo'
+
+interface Props { message: Message }
+
+export default function MessageBubble({ message }: Props) {
+  const isUser = message.role === 'user'
+
+  return (
+    <div className={`flex gap-3 group msg-animate mb-5 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      {!isUser && (
+        <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-700 to-violet-900 flex items-center justify-center shadow-[0_0_10px_rgba(124,58,237,0.3)] mt-1">
+          <SaionLogo size={20} animated={false} />
+        </div>
+      )}
+
+      <div className={`flex flex-col max-w-[88%] md:max-w-[78%] ${isUser ? 'items-end' : 'items-start'}`}>
+        {!isUser && <span className="text-[10px] text-gray-600 mb-1.5 px-1 font-display tracking-wide">SAION AI</span>}
+
+        {/* ── Edited Video — download card ── */}
+        {message.type === 'video' && message.metadata?.videoUrl && (
+          <VideoDownloadCard
+            url={message.metadata.videoUrl}
+            name={message.metadata.videoName || 'edited-video.webm'}
+            summary={message.metadata.videoEditSummary || ''}
+          />
+        )}
+
+        {/* ── Generated Image (puter.js / Pollinations) ── */}
+        {message.type === 'image' && message.metadata?.imageUrl && (
+          <ImagePlayer url={message.metadata.imageUrl} caption={message.metadata.imageCaption || 'AI Generated Image'} />
+        )}
+
+        {/* ── Website Preview ── */}
+        {message.type === 'website' && message.metadata?.websiteHtml && (
+          <WebsiteCard html={message.metadata.websiteHtml} />
+        )}
+
+        {/* ── VS Code Project Download ── */}
+        {message.type === 'project' && message.metadata?.projectFiles && (
+          <ProjectCard
+            name={message.metadata.projectName || 'my-project'}
+            structure={message.metadata.projectStructure || ''}
+            files={message.metadata.projectFiles}
+            setup={message.metadata.projectSetup || ''}
+            techStack={message.metadata.projectTechStack || ''}
+          />
+        )}
+
+        {/* ── Text bubble ── */}
+        {message.content && message.content !== '▋' && (
+          <div className={`relative px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+            isUser
+              ? 'bg-violet-600 text-white rounded-br-md'
+              : 'bg-[#111] text-gray-200 border border-[#1e1e1e] rounded-bl-md'
+          }`}>
+            {isUser
+              ? <p className="whitespace-pre-wrap">{message.content}</p>
+              : <MarkdownContent content={message.content} />
+            }
+          </div>
+        )}
+
+        {message.content === '▋' && (
+          <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl rounded-bl-md px-4 py-3.5">
+            <div className="typing-dots flex gap-1.5 items-center"><span /><span /><span /></div>
+          </div>
+        )}
+
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1.5">
+            {message.attachments.map(a => (
+              <div key={a.id} className="flex items-center gap-1.5 bg-[#111] border border-[#1e1e1e] rounded-lg px-2.5 py-1.5 text-xs text-gray-400">
+                {a.type === 'image'
+                  ? <img src={a.url} alt={a.name} className="w-5 h-5 object-cover rounded" />
+                  : <span className="text-violet-400">📎</span>}
+                {a.name}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <span className="text-[10px] text-gray-700 mt-1 px-1">
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      </div>
+
+      {isUser && (
+        <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-xs font-bold mt-1">
+          U
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Image Player — handles puter.js URLs and Pollinations ───────────────────
+function ImagePlayer({ url, caption }: { url: string; caption: string }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
+  const [retryCount, setRetryCount] = useState(0)
+  const [currentUrl, setCurrentUrl] = useState(url)
+
+  useEffect(() => {
+    setStatus('loading')
+    setCurrentUrl(url)
+  }, [url])
+
+  const retry = () => {
+    // Add cache-busting timestamp on retry
+    const newUrl = url.includes('?')
+      ? url.replace(/&?t=\d+/, '') + `&t=${Date.now()}`
+      : url + `?t=${Date.now()}`
+    setCurrentUrl(newUrl)
+    setStatus('loading')
+    setRetryCount(r => r + 1)
+  }
+
+  return (
+    <div className="mb-2 rounded-2xl overflow-hidden border border-[#1e1e1e] bg-[#0a0a0a]" style={{ maxWidth: 420 }}>
+      {status === 'loading' && (
+        <div className="flex flex-col items-center justify-center h-52 gap-3 text-gray-600">
+          <div className="w-7 h-7 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs">Generating your image...</p>
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="flex flex-col items-center justify-center h-52 gap-2 text-gray-600">
+          <ImageOff size={28} />
+          <p className="text-xs">Generation failed</p>
+          {retryCount < 3 && (
+            <button onClick={retry} className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 mt-1">
+              <RefreshCw size={12} /> Try again
+            </button>
+          )}
+        </div>
+      )}
+      <img
+        key={currentUrl}
+        src={currentUrl}
+        alt={caption}
+        className={`w-full block transition-opacity duration-500 ${status === 'loaded' ? 'opacity-100' : 'opacity-0 h-0'}`}
+        onLoad={() => setStatus('loaded')}
+        onError={() => {
+          if (retryCount < 2) {
+            setTimeout(retry, 2000) // auto-retry after 2s
+          } else {
+            setStatus('error')
+          }
+        }}
+      />
+      {status === 'loaded' && (
+        <div className="flex items-center justify-between px-3 py-2.5 bg-[#0d0d0d]">
+          <span className="text-xs text-gray-400 truncate max-w-[260px]">{caption}</span>
+          <a
+            href={currentUrl}
+            download="saion-image.png"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-violet-400 hover:text-violet-300 text-xs flex items-center gap-1 ml-2 shrink-0"
+          >
+            <Download size={12} /> Save
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Video Download Card ─────────────────────────────────────────────────────
+function VideoDownloadCard({ url, name, summary }: { url: string; name: string; summary: string }) {
+  const download = () => {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    a.click()
+  }
+  return (
+    <div className="mb-2 rounded-2xl overflow-hidden border border-violet-600/30 bg-[#0a0a0a]" style={{ maxWidth: 420 }}>
+      <div className="flex items-center gap-2.5 px-3 py-2.5 bg-[#0d0d0d] border-b border-[#1a1a1a]">
+        <span className="text-lg">🎬</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-xs font-semibold truncate">{name}</p>
+          {summary && <p className="text-gray-500 text-[10px] truncate">{summary}</p>}
+        </div>
+      </div>
+      <div className="p-4 flex flex-col items-center gap-3">
+        <video
+          src={url}
+          controls
+          className="w-full rounded-xl border border-[#1a1a1a]"
+          style={{ maxHeight: 240 }}
+        />
+        <button
+          onClick={download}
+          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-xl transition-all shadow-[0_0_12px_rgba(124,58,237,0.3)] w-full justify-center"
+        >
+          <Download size={13} /> Download Edited Video
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Markdown renderer ────────────────────────────────────────────────────────
+function MarkdownContent({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        code({ className, children }) {
+          const match = /language-(\w+)/.exec(className || '')
+          const code = String(children).replace(/\n$/, '')
+          if (code.includes('\n') || match) return <CodeBlock language={match?.[1]} code={code} />
+          return <code className="bg-[#1a1a1a] text-violet-300 px-1.5 py-0.5 rounded text-[0.82em] font-mono">{children}</code>
+        },
+        a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-violet-400 underline hover:text-violet-300">{children}</a>,
+        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-0.5">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-0.5">{children}</ol>,
+        h1: ({ children }) => <h1 className="text-xl font-bold text-white mb-2 font-display">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-lg font-semibold text-white mb-1.5 font-display">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-base font-semibold text-gray-100 mb-1">{children}</h3>,
+        blockquote: ({ children }) => <blockquote className="border-l-2 border-violet-600 pl-3 my-2 text-gray-400 italic">{children}</blockquote>,
+        table: ({ children }) => <div className="overflow-x-auto my-2"><table className="text-xs border-collapse w-full">{children}</table></div>,
+        th: ({ children }) => <th className="border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-1.5 text-left font-semibold text-gray-300">{children}</th>,
+        td: ({ children }) => <td className="border border-[#2a2a2a] px-3 py-1.5 text-gray-400">{children}</td>,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  )
+}
+
+function CodeBlock({ language, code }: { language?: string; code: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    await navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="my-2 rounded-xl overflow-hidden border border-[#222]">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#0d0d0d] border-b border-[#1a1a1a]">
+        <span className="text-[11px] text-gray-500 font-mono">{language || 'code'}</span>
+        <button onClick={copy} className="flex items-center gap-1.5 text-[11px] text-gray-500 hover:text-white transition-colors">
+          {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        language={language || 'text'}
+        style={oneDark}
+        customStyle={{ margin: 0, borderRadius: 0, fontSize: '0.78rem', background: '#0a0a0a' }}
+        showLineNumbers
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  )
+}
+
+function WebsiteCard({ html }: { html: string }) {
+  const [modal, setModal] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    await navigator.clipboard.writeText(html)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <>
+      <div className="mb-2 rounded-2xl overflow-hidden border border-violet-600/20 bg-[#0a0a0a]" style={{ maxWidth: 420 }}>
+        <div className="flex items-center justify-between px-3 py-2 bg-[#0d0d0d] border-b border-[#141414]">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <Globe size={12} className="text-violet-400" /> AI-Generated Website
+          </div>
+          <div className="flex gap-2">
+            <button onClick={copy} className="text-xs text-gray-500 hover:text-white flex items-center gap-1">
+              {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+            <button onClick={() => setModal(true)} className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1">
+              <ExternalLink size={11} /> Preview
+            </button>
+          </div>
+        </div>
+        <div className="p-3">
+          <iframe srcDoc={html} title="Preview" className="w-full rounded-lg border border-[#1a1a1a]"
+            style={{ height: 180, pointerEvents: 'none' }} sandbox="allow-scripts" />
+        </div>
+      </div>
+      {modal && <WebsiteModal html={html} onClose={() => setModal(false)} />}
+    </>
+  )
+}
+
+function WebsiteModal({ html, onClose }: { html: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    await navigator.clipboard.writeText(html)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  const exportHtml = () => {
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'saion-website.html'; a.click()
+    URL.revokeObjectURL(url)
+  }
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#1a1a1a]">
+          <div className="flex items-center gap-2 text-sm font-medium text-white">
+            <Globe size={15} className="text-violet-400" /> Website Preview
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={copy} className="saion-btn-ghost text-xs flex items-center gap-1.5">
+              {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+              {copied ? 'Copied' : 'Copy HTML'}
+            </button>
+            <button onClick={exportHtml} className="saion-btn-primary text-xs flex items-center gap-1.5">
+              <Download size={12} /> Export
+            </button>
+            <button onClick={onClose} className="text-gray-600 hover:text-white ml-1 text-lg leading-none">✕</button>
+          </div>
+        </div>
+        <div className="flex-1 p-4">
+          <iframe srcDoc={html} title="Website" className="w-full h-full rounded-xl border border-[#1a1a1a]"
+            sandbox="allow-scripts allow-same-origin allow-forms" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── VS Code Project Download Card ───────────────────────────────────────────
+function ProjectCard({
+  name, structure, files, setup, techStack
+}: {
+  name: string;
+  structure: string;
+  files: { path: string; content: string }[];
+  setup: string;
+  techStack: string;
+}) {
+  const [showStructure, setShowStructure] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const downloadZip = async () => {
+    setDownloading(true)
+    try {
+      // Build zip manually as a multi-file blob using data URIs
+      // We'll create an HTML file that auto-generates the project files
+      const fileListHtml = files.map(f =>
+        `<div class="file"><h3>${f.path}</h3><pre>${f.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></div>`
+      ).join('')
+
+      const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${name} - Project Files</title>
+<style>
+  body{font-family:monospace;background:#0d0d0d;color:#e0e0e0;padding:20px;max-width:900px;margin:0 auto}
+  h1{color:#a78bfa;border-bottom:1px solid #333;padding-bottom:10px}
+  .file{margin:20px 0;background:#111;border:1px solid #222;border-radius:8px;overflow:hidden}
+  .file h3{margin:0;padding:10px 16px;background:#1a1a1a;color:#60a5fa;font-size:13px}
+  pre{margin:0;padding:16px;overflow-x:auto;font-size:12px;line-height:1.6;white-space:pre-wrap}
+  .setup{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:8px;padding:16px;margin:16px 0}
+  .setup h2{color:#4ade80;margin:0 0 8px 0}
+  .setup pre{color:#86efac;background:none;padding:0;margin:0}
+</style></head>
+<body>
+<h1>📁 ${name}</h1>
+<p style="color:#9ca3af">Tech Stack: ${techStack}</p>
+<div class="setup"><h2>⚙️ Setup Instructions</h2><pre>${setup}</pre></div>
+<h2 style="color:#a78bfa">📄 Project Files (${files.length} files)</h2>
+${fileListHtml}
+</body></html>`
+
+      const blob = new Blob([html], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${name}-project.html`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const copySetup = () => {
+    navigator.clipboard.writeText(setup)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="w-full max-w-lg bg-[#0a0a0a] border border-violet-700/30 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(124,58,237,0.15)] mb-2">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-violet-900/40 to-[#0a0a0a] border-b border-violet-700/20">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-violet-900 flex items-center justify-center shadow-[0_0_15px_rgba(124,58,237,0.4)]">
+          <FolderOpen size={18} className="text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-semibold text-sm truncate">{name}</p>
+          <p className="text-violet-400 text-xs">{techStack}</p>
+        </div>
+        <span className="text-xs bg-violet-900/40 text-violet-300 border border-violet-700/30 px-2 py-0.5 rounded-full">
+          {files.length} files
+        </span>
+      </div>
+
+      {/* Setup */}
+      <div className="px-4 py-3 border-b border-[#1a1a1a]">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-gray-500 uppercase tracking-wider">Setup Commands</span>
+          <button onClick={copySetup} className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors">
+            {copied ? <><Check size={11} className="text-green-400" /> Copied</> : <><Copy size={11} /> Copy</>}
+          </button>
+        </div>
+        <pre className="text-xs text-green-400 bg-[#0a1a0a] border border-[#1a3a1a] rounded-lg px-3 py-2 overflow-x-auto">{setup}</pre>
+      </div>
+
+      {/* File list toggle */}
+      <div className="px-4 py-2.5 border-b border-[#1a1a1a]">
+        <button
+          onClick={() => setShowStructure(!showStructure)}
+          className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors w-full"
+        >
+          <FileCode size={13} />
+          <span>{showStructure ? 'Hide' : 'Show'} file structure</span>
+          <span className="ml-auto">{showStructure ? '▲' : '▼'}</span>
+        </button>
+        {showStructure && (
+          <pre className="mt-2 text-xs text-gray-400 bg-[#0d0d0d] rounded-lg px-3 py-2 overflow-x-auto leading-relaxed">
+            {structure || files.map(f => f.path).join('\n')}
+          </pre>
+        )}
+      </div>
+
+      {/* Download button */}
+      <div className="px-4 py-3">
+        <button
+          onClick={downloadZip}
+          disabled={downloading}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-800 text-white font-semibold text-sm hover:opacity-90 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] disabled:opacity-60"
+        >
+          {downloading
+            ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Preparing…</>
+            : <><Download size={15} /> Download Project Files</>
+          }
+        </button>
+        <p className="text-center text-xs text-gray-600 mt-2">Opens as HTML with all files — copy code into VS Code</p>
+      </div>
+    </div>
+  )
+}
