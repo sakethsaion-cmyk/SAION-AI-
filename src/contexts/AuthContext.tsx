@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import {
+  signInWithCredential,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
+  GoogleAuthProvider,
+  GithubAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User as FirebaseUser,
 } from 'firebase/auth';
-import { auth, googleProvider, githubProvider } from '../services/firebase';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { auth, githubProvider } from '../services/firebase';
 import { createOrUpdateUser, getUser } from '../services/dbService';
 import { User } from '../types';
 
@@ -35,9 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   useEffect(() => {
-    // Handle redirect result when app loads back after Google redirect
-    getRedirectResult(auth).catch(() => {});
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
@@ -58,18 +57,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
+  // Google → Native Android account picker (no browser needed)
   const signInWithGoogle = async () => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      const credential = GoogleAuthProvider.credential(
+        result.credential?.idToken,
+        result.credential?.accessToken,
+      );
+      await signInWithCredential(auth, credential);
     } catch (error) {
       console.error('Google sign in error:', error);
       throw new Error('Failed to sign in with Google. Please try again.');
     }
   };
 
+  // GitHub → Opens in external Chrome browser
   const signInWithGithub = async () => {
     try {
-      await signInWithRedirect(auth, githubProvider);
+      await signInWithPopup(auth, githubProvider);
     } catch (error) {
       console.error('GitHub sign in error:', error);
       throw new Error('Failed to sign in with GitHub. Please try again.');
@@ -77,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    await FirebaseAuthentication.signOut();
     await firebaseSignOut(auth);
     setUserProfile(null);
   };
