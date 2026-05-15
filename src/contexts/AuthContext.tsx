@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User as FirebaseUser,
@@ -33,6 +35,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   useEffect(() => {
+    // Handle redirect result when app loads back after Google redirect
+    getRedirectResult(auth).catch(() => {});
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
@@ -55,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.error('Google sign in error:', error);
       throw new Error('Failed to sign in with Google. Please try again.');
@@ -64,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGithub = async () => {
     try {
-      await signInWithPopup(auth, githubProvider);
+      await signInWithRedirect(auth, githubProvider);
     } catch (error) {
       console.error('GitHub sign in error:', error);
       throw new Error('Failed to sign in with GitHub. Please try again.');
