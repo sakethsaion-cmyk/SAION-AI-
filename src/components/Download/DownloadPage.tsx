@@ -10,7 +10,7 @@ const platforms = [
     name: 'Android',
     icon: <Smartphone size={28} />,
     badge: 'v1.0.1',
-    size: '3.51 MB',
+    size: '8.11 MB',
     ext: 'APK',
     color: 'from-green-600 to-emerald-700',
     glow: 'rgba(16,185,129,0.3)',
