@@ -8,8 +8,9 @@ import {
   onAuthStateChanged,
   type User as FirebaseUser,
 } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
-import { auth, githubProvider } from '../services/firebase';
+import { auth, googleProvider, githubProvider } from '../services/firebase';
 import { createOrUpdateUser, getUser } from '../services/dbService';
 import { User } from '../types';
 
@@ -24,6 +25,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+const isNative = Capacitor.isNativePlatform();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -57,22 +60,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
-  // Google → Native Android account picker (no browser needed)
+  // Google sign in: native picker on Android, popup on Windows/Linux/Web
   const signInWithGoogle = async () => {
     try {
-      const result = await FirebaseAuthentication.signInWithGoogle();
-      const credential = GoogleAuthProvider.credential(
-        result.credential?.idToken,
-        result.credential?.accessToken,
-      );
-      await signInWithCredential(auth, credential);
+      if (isNative) {
+        const result = await FirebaseAuthentication.signInWithGoogle();
+        const credential = GoogleAuthProvider.credential(
+          result.credential?.idToken,
+          result.credential?.accessToken,
+        );
+        await signInWithCredential(auth, credential);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (error) {
       console.error('Google sign in error:', error);
       throw new Error('Failed to sign in with Google. Please try again.');
     }
   };
 
-  // GitHub → Opens in external Chrome browser
+  // GitHub sign in: always opens in browser/popup
   const signInWithGithub = async () => {
     try {
       await signInWithPopup(auth, githubProvider);
@@ -83,7 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await FirebaseAuthentication.signOut();
+    if (isNative) {
+      await FirebaseAuthentication.signOut();
+    }
     await firebaseSignOut(auth);
     setUserProfile(null);
   };
