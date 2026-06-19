@@ -2,49 +2,115 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Icons -->
     <link rel="icon" type="image/png" href="/icon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Theme -->
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="SAION AI - Advanced AI Assistant by Saion Production" />
-    <title>SAION AI</title>
+
+    <!-- SEO -->
+    <title>SAION AI | Advanced AI Assistant by Saion Production</title>
+
+    <meta
+      name="description"
+      content="SAION AI is an advanced AI assistant developed by Saion Production. Chat with AI, generate images, play YouTube music, code, learn, and explore powerful AI tools."
+    />
+
+    <meta
+      name="keywords"
+      content="SAION AI, AI Assistant, Artificial Intelligence, ChatGPT Alternative, AI Chat, Image Generator, YouTube AI, Coding AI, Saion Production"
+    />
+
+    <meta name="author" content="Saion Production" />
+
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="canonical" href="https://saion-ai.netlify.app/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SAION AI" />
+    <meta property="og:title" content="SAION AI | Advanced AI Assistant" />
+    <meta
+      property="og:description"
+      content="Experience SAION AI by Saion Production. AI Chat, Image Generation, YouTube Music, Coding Assistant and much more."
+    />
+    <meta property="og:url" content="https://saion-ai.netlify.app/" />
+    <meta property="og:image" content="https://saion-ai.netlify.app/icon.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SAION AI" />
+    <meta
+      name="twitter:description"
+      content="Advanced AI Assistant by Saion Production."
+    />
+    <meta name="twitter:image" content="https://saion-ai.netlify.app/icon.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root { height: 100%; background: #000; }
-      body { overflow: hidden; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body,
+      #root {
+        height: 100%;
+        background: #000;
+      }
+
+      body {
+        overflow: hidden;
+      }
     </style>
 
     <!--
       CAPACITOR / ANDROID REDIRECT
-      When the app is opened as a native Android APK (via Capacitor),
-      window.Capacitor is defined. We redirect the hash to #/app
-      so AppLayout (Login → Chat) loads instead of DownloadPage.
-      Electron is handled by main.js passing hash: '/app' to loadFile().
     -->
     <script>
       (function () {
         var isCapacitor =
-          typeof window !== 'undefined' &&
+          typeof window !== "undefined" &&
           window.Capacitor &&
-          typeof window.Capacitor.isNativePlatform === 'function' &&
+          typeof window.Capacitor.isNativePlatform === "function" &&
           window.Capacitor.isNativePlatform();
 
         if (isCapacitor) {
-          // Force hash to /app so HashRouter lands on AppLayout
-          if (window.location.hash !== '#/app' && window.location.hash !== '#/chat') {
-            window.location.hash = '#/app';
+          if (
+            window.location.hash !== "#/app" &&
+            window.location.hash !== "#/chat"
+          ) {
+            window.location.hash = "#/app";
           }
         }
       })();
     </script>
   </head>
+
   <body>
     <div id="root"></div>
-    <!-- puter.js — FREE AI image generation (no API key needed) -->
+
+    <!-- Puter AI -->
     <script src="https://js.puter.com/v2/"></script>
+
+    <!-- React App -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
-</html>
+  </html>
