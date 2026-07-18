@@ -10,7 +10,7 @@
   "main": "electron/main.js",
   "homepage": "./",
   "dependencies": {
-    "@capacitor-firebase/authentication": "^5.4.0",
+    "@capacitor-firebase/authentication": "^6.0.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
