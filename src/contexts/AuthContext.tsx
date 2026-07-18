@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import {
   signInWithCredential,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   GithubAuthProvider,
   signOut as firebaseSignOut,
@@ -44,6 +46,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   useEffect(() => {
+    // Handle redirect result when returning from Google sign-in redirect
+    getRedirectResult(auth).catch(() => { /* ignore — no redirect pending */ });
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
@@ -85,6 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       if (isNative) {
+        // Android — use native Capacitor Firebase plugin
         const result = await FirebaseAuthentication.signInWithGoogle();
         const credential = GoogleAuthProvider.credential(
           result.credential?.idToken,
@@ -92,7 +98,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         await signInWithCredential(auth, credential);
       } else {
-        await signInWithPopup(auth, googleProvider);
+        // Web/Desktop — try popup first, fallback to redirect
+        try {
+          await signInWithPopup(auth, googleProvider);
+        } catch (popupError: any) {
+          // If popup blocked or fails, use redirect
+          if (
+            popupError?.code === 'auth/popup-blocked' ||
+            popupError?.code === 'auth/popup-closed-by-user' ||
+            popupError?.code === 'auth/cancelled-popup-request'
+          ) {
+            await signInWithRedirect(auth, googleProvider);
+          } else {
+            throw popupError;
+          }
+        }
       }
     } catch (error) {
       console.error('Google sign in error:', error);
