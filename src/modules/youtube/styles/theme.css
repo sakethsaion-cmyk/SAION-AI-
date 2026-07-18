@@ -1,0 +1,143 @@
+/* ============================================================
+   YouTube Module – Design System Tokens
+   ============================================================
+   All colour, spacing, radius, shadow, and motion values are
+   defined here as CSS custom properties.  Components reference
+   tokens only – never hard-coded values – so the entire module
+   can be re-skinned by overriding this file.
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --yt-red:          #ff0000;
+  --yt-red-hover:    #cc0000;
+
+  /* Surface / Background */
+  --yt-bg-base:      #0f0f0f;
+  --yt-bg-surface:   #1a1a1a;
+  --yt-bg-elevated:  #242424;
+  --yt-bg-input:     #121212;
+  --yt-bg-hover:     #2a2a2a;
+  --yt-bg-overlay:   rgba(0, 0, 0, 0.72);
+
+  /* Text */
+  --yt-text-primary:   #f1f1f1;
+  --yt-text-secondary: #aaaaaa;
+  --yt-text-muted:     #717171;
+  --yt-text-link:      #3ea6ff;
+  --yt-text-error:     #ff6b6b;
+
+  /* Border */
+  --yt-border:         rgba(255, 255, 255, 0.1);
+  --yt-border-focus:   #3ea6ff;
+
+  /* Spacing (8-point grid) */
+  --yt-space-1:  4px;
+  --yt-space-2:  8px;
+  --yt-space-3:  12px;
+  --yt-space-4:  16px;
+  --yt-space-5:  20px;
+  --yt-space-6:  24px;
+  --yt-space-8:  32px;
+  --yt-space-10: 40px;
+  --yt-space-12: 48px;
+
+  /* Border radius */
+  --yt-radius-sm:   4px;
+  --yt-radius-md:   8px;
+  --yt-radius-lg:   12px;
+  --yt-radius-xl:   16px;
+  --yt-radius-full: 9999px;
+
+  /* Shadows */
+  --yt-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --yt-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --yt-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --yt-shadow-focus: 0 0 0 3px rgba(62, 166, 255, 0.4);
+
+  /* Typography */
+  --yt-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --yt-font-mono: 'SF Mono', 'Fira Code', Consolas, monospace;
+
+  --yt-text-xs:   0.6875rem;  /* 11px */
+  --yt-text-sm:   0.8125rem;  /* 13px */
+  --yt-text-base: 0.9375rem;  /* 15px */
+  --yt-text-lg:   1.0625rem;  /* 17px */
+  --yt-text-xl:   1.25rem;    /* 20px */
+  --yt-text-2xl:  1.5rem;     /* 24px */
+
+  --yt-leading-tight:  1.25;
+  --yt-leading-normal: 1.5;
+
+  /* Transitions */
+  --yt-transition-fast:   100ms ease;
+  --yt-transition-normal: 200ms ease;
+  --yt-transition-slow:   300ms ease;
+
+  /* Z-index scale */
+  --yt-z-base:    1;
+  --yt-z-overlay: 10;
+  --yt-z-modal:   100;
+  --yt-z-tooltip: 200;
+
+  /* Player */
+  --yt-player-aspect: 56.25%; /* 16:9 */
+}
+
+/* ── Global resets scoped to the module ── */
+.yt-module *,
+.yt-module *::before,
+.yt-module *::after {
+  box-sizing: border-box;
+}
+
+.yt-module {
+  font-family: var(--yt-font-sans);
+  font-size: var(--yt-text-base);
+  color: var(--yt-text-primary);
+  background-color: var(--yt-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: var(--yt-leading-normal);
+}
+
+/* ── Accessibility: respect motion preferences ── */
+@media (prefers-reduced-motion: reduce) {
+  .yt-module *,
+  .yt-module *::before,
+  .yt-module *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Shared keyframe animations ── */
+/* Declared here (not in player.css) so they're always available
+   to any component that needs them, including the module-level
+   loading spinner in YoutubeModule.tsx */
+@keyframes yt-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes yt-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Utility: visually hidden but screen-reader accessible */
+.yt-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Utility: fade-in animation for content entering the DOM */
+.yt-fade-in {
+  animation: yt-fade-in var(--yt-transition-slow) ease both;
+}

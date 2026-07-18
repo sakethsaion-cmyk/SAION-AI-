@@ -1,0 +1,28 @@
+name: Build Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Build Linux
+        run: npm run electron:build:linux
+        env:
+          VITE_OPENROUTER_API_KEY: ${{ secrets.VITE_OPENROUTER_API_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: linux-build
+          path: |
+            release/*.AppImage
+            release/latest-linux.yml
+             release/*.deb

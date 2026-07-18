@@ -1,0 +1,102 @@
+/* ============================================================
+   Search Bar Styles
+   ============================================================ */
+
+.yt-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  background: var(--yt-bg-input);
+  border: 1.5px solid var(--yt-border);
+  border-radius: var(--yt-radius-full);
+  transition: border-color var(--yt-transition-fast), box-shadow var(--yt-transition-fast);
+  overflow: hidden;
+}
+
+.yt-search-bar:focus-within {
+  border-color: var(--yt-border-focus);
+  box-shadow: var(--yt-shadow-focus);
+}
+
+.yt-search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--yt-text-muted);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.yt-search-input {
+  flex: 1;
+  height: 44px;
+  padding: 0 var(--yt-space-2);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: var(--yt-text-base);
+  font-family: var(--yt-font-sans);
+  color: var(--yt-text-primary);
+  caret-color: var(--yt-border-focus);
+}
+
+.yt-search-input::placeholder {
+  color: var(--yt-text-muted);
+}
+
+.yt-search-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-right: var(--yt-space-1);
+  border: none;
+  background: transparent;
+  color: var(--yt-text-muted);
+  border-radius: var(--yt-radius-full);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--yt-transition-fast), color var(--yt-transition-fast);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.yt-search-clear-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.yt-search-clear-btn:hover {
+  background: var(--yt-bg-hover);
+  color: var(--yt-text-primary);
+}
+
+.yt-search-clear-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--yt-shadow-focus);
+}
+
+/* Animated loading indicator below the search bar */
+.yt-search-progress {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--yt-red) 40%,
+    var(--yt-red) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: yt-progress 1.2s ease infinite;
+  border-radius: var(--yt-radius-full);
+  margin-top: var(--yt-space-1);
+}
+
+@keyframes yt-progress {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
