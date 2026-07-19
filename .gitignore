@@ -2,11 +2,12 @@ node_modules/
 dist/
 .env
 .env.local
+.env*.local
+backend/.env
+backend/.env.local
 .DS_Store
 *.log
 .vite/
 coverage/
 release/
 android/
-
-
